@@ -11,7 +11,7 @@ NtpSync  ntp;
 LedStatus led;
 
 static uint32_t frameCount = 0;
-static unsigned long lastNtpSyncMs = 0;
+static uint32_t lastNtpSyncFrame = 0;
 
 static void printFrame(uint8_t num, const int cst[7], const uint16_t dur[20]) {
     Serial.printf("[TX] Frame #%04u  %04d-%02d-%02d %02d:%02d:%02d  dur:",
@@ -52,7 +52,7 @@ void setup() {
         delay(5000);
         led.set(LedPattern::FAST_BLINK);
     }
-    lastNtpSyncMs = millis();
+    lastNtpSyncFrame = frameCount;
 
     // ── 初始化完成 ──
     led.set(LedPattern::ON);
@@ -98,15 +98,15 @@ void loop() {
         needRealign = true;
     }
 
-    // 每 10 分钟 NTP 重同步
-    if (millis() - lastNtpSyncMs >= NTP_RESYNC_MS) {
+    // 每 NTP_RESYNC_FRAMES 帧 NTP 重同步 (~30 分钟)
+    if (frameCount - lastNtpSyncFrame >= NTP_RESYNC_FRAMES) {
         Serial.printf("[NTP] Resync (after %lu frames)\n", frameCount);
         led.set(LedPattern::FAST_BLINK);
         if (!ntp.ntpSync()) {
             Serial.println("[NTP] Resync failed, continuing TX");
             led.set(LedPattern::TRIPLE_BLINK);
         } else {
-            lastNtpSyncMs = millis();
+            lastNtpSyncFrame = frameCount;
             led.set(LedPattern::ON);
         }
         needRealign = true;

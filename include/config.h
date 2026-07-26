@@ -8,7 +8,7 @@
 // ── NTP ──
 #define NTP_HOST        "pool.ntp.org"
 #define CST_OFFSET      (8 * 3600)  // UTC+8
-#define NTP_RESYNC_MS   1800000UL   // NTP 重同步间隔(ms), 30 分钟
+#define NTP_RESYNC_FRAMES 90        // NTP 重同步间隔(帧数), ~30 分钟
 
 // ── BPC 引脚与载波 ──
 #define BPC_PIN         3           // BPC 载波输出 GPIO
