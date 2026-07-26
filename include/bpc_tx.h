@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include "driver/ledc.h"
+#include "driver/gpio.h"
 #include "config.h"
 
 // ESP32-C3 LEDC 默认使用 XTAL (40MHz), 10-bit 分辨率最高只能 ~39kHz.
@@ -14,6 +15,11 @@
 class BpcTx {
 public:
     void begin() {
+        // 先将 GPIO3 强制拉低，防止 LEDC 配置前 NMOS 意外导通
+        gpio_reset_pin((gpio_num_t)BPC_PIN);
+        gpio_set_direction((gpio_num_t)BPC_PIN, GPIO_MODE_OUTPUT);
+        gpio_set_level((gpio_num_t)BPC_PIN, 0);
+
         // Timer: APB clock (80MHz), 10-bit, 68.5kHz
         // ESP32-C3 默认用 XTAL(40MHz), 10bit 下最高 ~39kHz, 必须指定 APB(80MHz)
         ledc_timer_config_t timer_cfg = {
